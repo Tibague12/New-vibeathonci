@@ -6,8 +6,8 @@ import { Magnetic } from "../components/ui/Magnetic";
 
 const pricing = [
   {
-    name: "Visiteur Gratuit",
-    price: "Gratuit",
+    name: "Visiteur",
+    price: "500 FCFA",
     desc: "Vivez l'événement de l'intérieur.",
     features: [
       "Accès aux Keynotes",
@@ -15,7 +15,7 @@ const pricing = [
       "Accès au Pitch Final des compétiteurs"
     ],
     type: "visiteur",
-    buttonLabel: "S'inscrire gratuitement",
+    buttonLabel: "Payer 500 FCFA",
     icon: Ticket
   },
   {
@@ -66,17 +66,37 @@ function PaymentLogo({ type }: { type: string }) {
     case "wave":
       return (
         <div className="w-12 h-12 bg-[#1bd7e4] rounded-2xl flex items-center justify-center shadow-sm mb-3">
-           <span className="text-white font-bold text-xl tracking-tighter">wave</span>
+           <svg viewBox="0 0 100 100" className="w-8 h-8">
+             {/* Flippers */}
+             <path d="M 32 45 C 15 45, 18 20, 25 22" stroke="#0A0A0A" strokeWidth="12" strokeLinecap="round" fill="none" />
+             <path d="M 68 45 C 85 45, 82 70, 75 75" stroke="#0A0A0A" strokeWidth="12" strokeLinecap="round" fill="none" />
+             
+             {/* Feet */}
+             <ellipse cx="38" cy="82" rx="9" ry="5" fill="#F18122" />
+             <ellipse cx="62" cy="82" rx="9" ry="5" fill="#F18122" />
+
+             {/* Body */}
+             <rect x="28" y="16" width="44" height="66" rx="22" fill="#0A0A0A" />
+
+             {/* Belly */}
+             <ellipse cx="50" cy="62" rx="14" ry="19" fill="#FFFFFF" />
+
+             {/* Eyes */}
+             <circle cx="43" cy="32" r="3.5" fill="#FFFFFF" />
+             <circle cx="57" cy="32" r="3.5" fill="#FFFFFF" />
+
+             {/* Beak */}
+             <path d="M 44 40 Q 50 45 56 40 Q 50 36 44 40 Z" fill="#F18122" />
+           </svg>
         </div>
       );
     case "orange":
       return (
-        <div className="w-12 h-12 rounded-2xl flex flex-col items-center justify-center shadow-sm relative overflow-hidden bg-black mb-3 border border-[#ff7900]/20">
-           <div className="absolute inset-0 flex flex-col">
-             <div className="flex-1 bg-[#ff7900]"></div>
-             <div className="flex-1 bg-black"></div>
-           </div>
-           <span className="relative z-10 text-white font-black text-[9px] leading-tight text-center">orange<br/>money</span>
+        <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center shadow-sm mb-3">
+           <svg viewBox="0 0 100 100" className="w-8 h-8">
+             <path d="M 18 36 L 42 36 L 42 60 M 18 60 L 42 36" stroke="#FFFFFF" fill="none" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+             <path d="M 82 64 L 58 64 L 58 40 M 82 40 L 58 64" stroke="#ff7900" fill="none" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+           </svg>
         </div>
       );
     case "mtn":
@@ -101,17 +121,50 @@ function PaymentLogo({ type }: { type: string }) {
 
 export function Registration() {
   const [activeForm, setActiveForm] = useState<"visiteur" | "formation_adulte" | "formation_kids" | "competition">("visiteur");
-  const [formData, setFormData] = useState({ nom: "", email: "", extra: "", message: "" });
+  const [formData, setFormData] = useState({ nom: "", email: "", tel: "", extra: "", message: "" });
   const [paymentMethod, setPaymentMethod] = useState<"wave" | "orange" | "mtn" | "card" | "">("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (activeForm !== "visiteur" && !paymentMethod) {
+    if (!paymentMethod) {
       alert("Veuillez sélectionner un moyen de paiement.");
       return;
     }
-    alert("Inscription envoyée ! Nous vous contacterons bientôt.");
-    setFormData({ nom: "", email: "", extra: "", message: "" });
+
+    setIsProcessing(true);
+    const plan = pricing.find(p => p.type === activeForm);
+    const amount = plan?.price === "10 000 FCFA" ? 10000 : plan?.price === "5 000 FCFA" ? 5000 : plan?.price === "500 FCFA" ? 500 : 20000;
+
+    const PaiementPro = (window as any).PaiementPro;
+    if (!PaiementPro) {
+      alert("Le service de paiement est indisponible pour le moment.");
+      setIsProcessing(false);
+      return;
+    }
+
+      let paiementPro = new PaiementPro('PP-F92248');
+      paiementPro.amount = amount;
+      paiementPro.channel = '';
+      paiementPro.referenceNumber = `VB-${Date.now()}`;
+      paiementPro.customerEmail = formData.email;
+      paiementPro.customerLastname = formData.nom;
+      paiementPro.customerPhoneNumber = formData.tel || '0000000000';
+      paiementPro.description = `Inscription ${plan?.name}`;
+
+      try {
+        await paiementPro.getUrlPayment();
+        if (paiementPro.success) {
+          window.location.href = paiementPro.url;
+        } else {
+          alert("Erreur lors de l'initialisation du paiement.");
+          setIsProcessing(false);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erreur de connexion.");
+        setIsProcessing(false);
+      }
   };
 
   return (
@@ -195,7 +248,7 @@ export function Registration() {
                 onClick={() => setActiveForm("visiteur")}
                 className={cn("w-full md:flex-1 py-3 px-4 text-sm font-medium rounded-full transition-all duration-300", activeForm === "visiteur" ? "bg-white text-[#1d1d1f] shadow-md" : "text-[#86868b] hover:text-[#1d1d1f] hover:bg-gray-200/50")}
               >
-                Visiteur Gratuit
+                Visiteur
               </button>
               <button 
                 type="button"
@@ -243,6 +296,14 @@ export function Registration() {
                       />
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Numéro de téléphone</label>
+                    <input 
+                      type="tel" required value={formData.tel} onChange={e => setFormData({...formData, tel: e.target.value})}
+                      className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base placeholder:text-[#86868b]" 
+                      placeholder="+225 01 02 03 04 05"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -266,19 +327,29 @@ export function Registration() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Atelier au choix</label>
-                    <select 
-                      required 
-                      value={formData.extra} 
-                      onChange={e => setFormData({...formData, extra: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base appearance-none cursor-pointer"
-                    >
-                      <option value="" disabled>Sélectionnez un atelier</option>
-                      <option value="prompt">Prompt Engineering avancé</option>
-                      <option value="vibecoding">Vibecoding de A à Z</option>
-                      <option value="agents">Création d'agents intelligents</option>
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Atelier au choix</label>
+                      <select 
+                        required 
+                        value={formData.extra} 
+                        onChange={e => setFormData({...formData, extra: e.target.value})}
+                        className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>Sélectionnez un atelier</option>
+                        <option value="prompt">Prompt Engineering avancé</option>
+                        <option value="vibecoding">Vibecoding de A à Z</option>
+                        <option value="agents">Création d'agents intelligents</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Numéro de téléphone</label>
+                      <input 
+                        type="tel" required value={formData.tel} onChange={e => setFormData({...formData, tel: e.target.value})}
+                        className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base placeholder:text-[#86868b]" 
+                        placeholder="+225 01 02 03 04 05"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -303,14 +374,24 @@ export function Registration() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Âge de l'enfant</label>
-                    <input 
-                      type="number" required 
-                      className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base placeholder:text-[#86868b]" 
-                      placeholder="Âge"
-                      min="6" max="15"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Âge de l'enfant</label>
+                      <input 
+                        type="number" required 
+                        className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base placeholder:text-[#86868b]" 
+                        placeholder="Âge"
+                        min="6" max="15"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Numéro de téléphone</label>
+                      <input 
+                        type="tel" required value={formData.tel} onChange={e => setFormData({...formData, tel: e.target.value})}
+                        className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base placeholder:text-[#86868b]" 
+                        placeholder="+225 01 02 03 04 05"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -335,20 +416,30 @@ export function Registration() {
                       />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Thématique du projet</label>
-                    <select 
-                      required 
-                      value={formData.extra} 
-                      onChange={e => setFormData({...formData, extra: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base appearance-none cursor-pointer"
-                    >
-                      <option value="" disabled>Sélectionnez un thème</option>
-                      <option value="agriculture">Agriculture</option>
-                      <option value="energie">Énergie</option>
-                      <option value="transport">Transport</option>
-                      <option value="ressources">Gestion des ressources</option>
-                    </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Thématique du projet</label>
+                      <select 
+                        required 
+                        value={formData.extra} 
+                        onChange={e => setFormData({...formData, extra: e.target.value})}
+                        className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>Sélectionnez un thème</option>
+                        <option value="agriculture">Agriculture</option>
+                        <option value="energie">Énergie</option>
+                        <option value="transport">Transport</option>
+                        <option value="ressources">Gestion des ressources</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Numéro de téléphone</label>
+                      <input 
+                        type="tel" required value={formData.tel} onChange={e => setFormData({...formData, tel: e.target.value})}
+                        className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent focus:border-[#06c] focus:bg-white rounded-xl outline-none transition-all duration-300 focus:shadow-[0_0_0_4px_rgba(6,102,204,0.1)] text-[#1d1d1f] text-base placeholder:text-[#86868b]" 
+                        placeholder="+225 01 02 03 04 05"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-[#1d1d1f] mb-2">Description courte du projet</label>
@@ -361,9 +452,8 @@ export function Registration() {
                 </div>
               )}
 
-              {/* Payment Section for Paid Plans */}
-              {activeForm !== "visiteur" && (
-                <div className="pt-8 border-t border-[#d2d2d7]/50 mt-8">
+              {/* Payment Section */}
+              <div className="pt-8 border-t border-[#d2d2d7]/50 mt-8">
                   <h3 className="text-xl font-bold tracking-tight text-[#1d1d1f] mb-6">Moyen de paiement</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
@@ -389,13 +479,12 @@ export function Registration() {
                       </label>
                     ))}
                   </div>
-                </div>
-              )}
+              </div>
 
               <div className="pt-8 flex justify-center">
                 <Magnetic>
-                  <button type="submit" className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-[#06c] to-[#005bb5] shadow-lg shadow-[#06c]/20 text-white font-bold text-base hover:scale-[1.02] transition-all rounded-full flex items-center justify-center group">
-                    {activeForm === "visiteur" ? "Confirmer l'inscription" : "Procéder au paiement"}
+                  <button disabled={isProcessing} type="submit" className={`w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-[#06c] to-[#005bb5] shadow-lg shadow-[#06c]/20 text-white font-bold text-base transition-all rounded-full flex items-center justify-center group ${isProcessing ? 'opacity-70 cursor-not-allowed' : 'hover:scale-[1.02]'}`}>
+                    {isProcessing ? "Traitement en cours..." : "Procéder au paiement"}
                   </button>
                 </Magnetic>
               </div>
