@@ -1,0 +1,6 @@
+{
+  "name": "Vibeathon 2026",
+  "description": "Site officiel de l'événement Vibeathon 2026 en Côte d'Ivoire. Intelligence artificielle et environnement : Innover pour un avenir durable et inclusif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
