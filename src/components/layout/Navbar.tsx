@@ -1,7 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Code2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const links = [
@@ -30,8 +29,8 @@ export function Navbar() {
       isScrolled ? "bg-black/70 backdrop-blur-md" : "bg-[#1d1d1f]"
     )}>
       <nav className="max-w-5xl mx-auto px-4 flex items-center justify-between h-12">
-        <Link to="/" className="flex items-center text-white/80 hover:text-white transition-colors">
-          <Code2 className="w-4 h-4" />
+        <Link to="/" className="flex items-center text-white font-bold tracking-tight text-sm hover:opacity-80 transition-opacity">
+          VibeathonCI 2026
         </Link>
 
         <ul className="hidden md:flex items-center gap-8 text-xs font-normal text-white/80">

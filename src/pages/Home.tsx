@@ -22,15 +22,6 @@ export function Home() {
            <div className="absolute inset-0 bg-black/50"></div>
         </div>
         <div className="max-w-4xl mx-auto w-full relative z-10 flex flex-col items-center">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-white text-2xl md:text-3xl font-semibold tracking-tight mb-2"
-          >
-            Vibeathon 2026
-          </motion.h2>
-          
           <Countdown />
           
           <motion.h1
