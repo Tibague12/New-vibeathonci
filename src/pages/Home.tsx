@@ -4,12 +4,23 @@ import { ChevronRight } from "lucide-react";
 import { FadeUp } from "../components/ui/FadeUp";
 import { Magnetic } from "../components/ui/Magnetic";
 import { AnimatedImage } from "../components/ui/AnimatedImage";
+import { Countdown } from "../components/ui/Countdown";
+
+import imgHero from "../assets/images/black_woman_coding_1780252484086.png";
+import imgKeynotes from "../assets/images/black_woman_presenting_1780253229641.png";
+import imgCompetition from "../assets/images/black_man_typing_1780252525253.png";
+import imgFormations from "../assets/images/black_students_hackathon_1780253265360.png";
+import imgStudio from "../assets/images/black_man_studio_1780253248698.png";
 
 export function Home() {
   return (
     <div className="w-full flex flex-col items-center bg-[#f5f5f7]">
       {/* Hero Section */}
       <section className="w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pt-24 pb-12 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 w-full h-full z-0">
+           <AnimatedImage src={imgHero} alt="Woman coding" className="w-full h-full [&_img]:min-h-full [&_img]:object-cover opacity-80" />
+           <div className="absolute inset-0 bg-black/50"></div>
+        </div>
         <div className="max-w-4xl mx-auto w-full relative z-10 flex flex-col items-center">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -19,6 +30,9 @@ export function Home() {
           >
             Vibeathon 2026
           </motion.h2>
+          
+          <Countdown />
+          
           <motion.h1
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
@@ -127,6 +141,7 @@ export function Home() {
                 description="Des experts partagent leurs visions sur les enjeux de l'IA pour l'environnement."
                 link="/speakers"
                 className="bg-[#ffffff] h-[400px]"
+                imgSrc={imgKeynotes}
               />
             </FadeUp>
             <FadeUp delay={0.2} className="col-span-1">
@@ -136,6 +151,7 @@ export function Home() {
                 link="/competition"
                 className="bg-black text-white h-[400px]"
                 theme="dark"
+                imgSrc={imgCompetition}
               />
             </FadeUp>
             <FadeUp delay={0.3} className="col-span-1">
@@ -144,6 +160,7 @@ export function Home() {
                 description="Apprenez le Vibecoding et la création d'agents."
                 link="/formations"
                 className="bg-[#ffffff] h-[400px]"
+                imgSrc={imgFormations}
               />
             </FadeUp>
             <FadeUp delay={0.4} className="col-span-1 md:col-span-2">
@@ -152,6 +169,7 @@ export function Home() {
                 description="Testez la génération de photos, vidéos et musique."
                 link="/programme"
                 className="bg-[#ffffff] h-[400px]"
+                imgSrc={imgStudio}
               />
             </FadeUp>
           </div>
@@ -202,17 +220,23 @@ export function Home() {
   );
 }
 
-function ActivityItem({ title, description, link, className, theme = "light" }: { title: string, description: string, link: string, className?: string, theme?: "light" | "dark" }) {
+function ActivityItem({ title, description, link, className, theme = "light", imgSrc }: { title: string, description: string, link: string, className?: string, theme?: "light" | "dark", imgSrc?: string }) {
   const isDark = theme === "dark";
   return (
-    <Link to={link} className={`rounded-3xl p-10 md:p-12 transition-transform hover:scale-[1.02] duration-300 flex flex-col justify-between overflow-hidden shadow-sm ${className}`}>
-      <div>
-        <h3 className={`text-3xl lg:text-4xl font-bold tracking-tight mb-4 ${isDark ? 'text-white' : 'text-[#1d1d1f]'}`}>{title}</h3>
-        <p className={`text-lg font-medium leading-relaxed max-w-sm ${isDark ? 'text-white/70' : 'text-[#86868b]'}`}>{description}</p>
+    <Link to={link} className={`rounded-3xl p-10 md:p-12 transition-transform hover:scale-[1.02] duration-300 flex flex-col justify-between overflow-hidden shadow-sm relative group/item ${className}`}>
+      {imgSrc && (
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <img src={imgSrc} alt={title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/item:scale-110 opacity-70" />
+          <div className="absolute inset-0 bg-black/40 mix-blend-multiply"></div>
+        </div>
+      )}
+      <div className="relative z-10">
+        <h3 className={`text-3xl lg:text-4xl font-bold tracking-tight mb-4 ${isDark || imgSrc ? 'text-white' : 'text-[#1d1d1f]'}`}>{title}</h3>
+        <p className={`text-lg font-medium leading-relaxed max-w-sm ${isDark || imgSrc ? 'text-white/80' : 'text-[#86868b]'}`}>{description}</p>
       </div>
-      <div className="flex items-center gap-1 group">
-         <span className={`text-base font-medium ${isDark ? 'text-white' : 'text-[#06c]'} group-hover:underline`}>Découvrir</span>
-         <ChevronRight className={`w-4 h-4 ${isDark ? 'text-white' : 'text-[#06c]'} group-hover:translate-x-1 transition-transform`} />
+      <div className="flex items-center gap-1 group relative z-10">
+         <span className={`text-base font-medium ${isDark || imgSrc ? 'text-white' : 'text-[#06c]'} group-hover:underline`}>Découvrir</span>
+         <ChevronRight className={`w-4 h-4 ${isDark || imgSrc ? 'text-white' : 'text-[#06c]'} group-hover:translate-x-1 transition-transform`} />
       </div>
     </Link>
   );

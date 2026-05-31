@@ -4,6 +4,8 @@ import { FadeUp } from "../components/ui/FadeUp";
 import { Magnetic } from "../components/ui/Magnetic";
 import { AnimatedImage } from "../components/ui/AnimatedImage";
 
+import imgBlackDevs from "../assets/images/black_devs_collab_1780252505317.png";
+
 export function Competition() {
   return (
     <div className="w-full flex flex-col items-center bg-white">
@@ -21,8 +23,12 @@ export function Competition() {
       </section>
 
       {/* Hero Image replacement */}
-      <section className="w-full max-w-[1200px] mx-auto px-6 pb-24">
-        <FadeUp delay={0.2} className="w-full bg-black rounded-3xl p-12 md:p-24 text-center flex flex-col items-center justify-center min-h-[500px]">
+      <section className="w-full max-w-[1200px] mx-auto px-6 pb-24 relative overflow-hidden rounded-3xl min-h-[500px] flex flex-col items-center justify-center text-center">
+        <div className="absolute inset-0 w-full h-full">
+           <AnimatedImage src={imgBlackDevs} alt="Developers collaborating" className="w-full h-full [&>img]:h-[150%] [&>img]:object-cover" />
+           <div className="absolute inset-0 bg-black/60 mix-blend-multiply z-10"></div>
+        </div>
+        <FadeUp delay={0.2} className="relative z-20 p-12 md:p-24 w-full flex flex-col items-center justify-center">
            <h3 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-6">5 personnes.<br/>3 jours.<br/>1 million.</h3>
            <p className="text-xl text-white/70 font-medium">L'avenir s'écrit maintenant.</p>
         </FadeUp>
